@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <title>Sustainability Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Font Awesome CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     :root {
-      --hue: 208;
-      --primary: hsl(var(--hue), 80%, 55%);
-      --primary-light: hsl(var(--hue), 80%, 65%);
+      --hue: 276.9; /* Purple */
+      --primary: hsl(var(--hue), 100%, 55%);
+      --primary-light: hsl(var(--hue), 90%, 65%);
       --primary-lighter: hsl(var(--hue), 80%, 85%);
       --primary-dark: hsl(var(--hue), 80%, 35%);
       --primary-darkest: hsl(var(--hue), 80%, 25%);
@@ -49,7 +48,7 @@
     }
     .loader {
       width: 80%;
-      max-width: 420px;
+      max-width: 400px;
       height: 16px;
       background: #3a3a3a;
       border-radius: 8px;
@@ -59,8 +58,7 @@
     }
     .loader-bar {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       height: 100%;
       width: 0;
       background: linear-gradient(90deg, var(--primary), var(--primary-light));
@@ -149,6 +147,12 @@
       .navbar-icon {
         display: block;
       }
+    }
+
+    /* Main Content */
+    .main-content {
+      display: none;
+      padding-top: 20px;
     }
 
     /* About Section */
@@ -361,7 +365,7 @@
       color: var(--primary-darkest);
     }
 
-    /* Customer Section (Font Awesome Icons) */
+    /* Customer Section (Names Only) */
     .customers-section {
       background: var(--primary);
       border-radius: var(--border-radius);
@@ -379,29 +383,25 @@
       letter-spacing: 1px;
     }
     .customers-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 36px;
-      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 24px;
+      max-width: 800px;
+      margin: 0 auto;
     }
-    .company-logo {
-      font-size: 2.8rem;
-      border-radius: 12px;
+    .customer-name {
       background: var(--primary-light);
-      color: var(--primary-darkest);
-      width: 70px;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border-radius: 12px;
+      padding: 16px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+      transition: var(--transition);
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: transform 0.2s, background 0.2s;
     }
-    .company-logo:hover {
+    .customer-name:hover {
       background: var(--primary-dark);
-      color: #fff;
-      transform: translateY(-5px) scale(1.08);
+      transform: translateY(-3px);
     }
 
     /* Carousel Section */
@@ -477,7 +477,7 @@
       gap: 12px;
       border-radius: var(--border-radius);
       box-shadow: var(--shadow);
-      border: 1px solid rgba(0,0,0,0.05);
+      border: 2px solid var(--primary);
     }
     .brand-heading {
       font-size: 1.8rem;
@@ -565,7 +565,6 @@
       background-position: center;
       opacity: 0.7;
     }
-
     @media (max-width: 768px) {
       .container { padding: 12px; }
       .about-section, .stats-section, .chart-section, .customers-section, .carousel-slide { padding: 20px; }
@@ -573,12 +572,14 @@
       .stat-value { font-size: 2rem; }
       .chart-header { flex-direction: column; gap: 20px; }
       .chart-filters { width: 100%; }
+      .customers-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .brand-kits-card { margin: 20px auto; padding: 20px 12px; }
-      .customers-grid { gap: 18px; }
-      .company-logo { font-size: 2.1rem; width: 50px; height: 50px; }
+      .customer-name { padding: 12px 8px; font-size: 0.9rem; }
     }
     @media (max-width: 480px) {
       .chart-container { height: 300px; }
+      .customers-grid { grid-template-columns: 1fr; }
+      .brand-heading { font-size: 1.4rem; }
     }
   </style>
 </head>
@@ -628,21 +629,22 @@
               <div class="stat-bar">
                 <span>2022</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 85%"></div>
+                  <div class="bar-fill" style="width:85%"></div>
                 </div>
                 <span>45,048</span>
               </div>
+              <极>
               <div class="stat-bar">
                 <span>2021</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 25%"></div>
+                  <div class="bar-fill" style="width:25%"></div>
                 </div>
                 <span>14,111</span>
               </div>
               <div class="stat-bar">
                 <span>2020</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 60%"></div>
+                  <div class="bar-fill" style="width:60%"></div>
                 </div>
                 <span>32,813</span>
               </div>
@@ -651,27 +653,28 @@
           <div class="stat-card">
             <div class="stat-title">Managed portfolio energy intensity</div>
             <div class="stat-value">123</div>
+           极>
             <div class="stat-unit">kWh/m²</div>
             <div class="stat-change negative">↓ 22% from 2019</div>
             <div class="stat-bars">
               <div class="stat-bar">
                 <span>2022</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 75%"></div>
+                  <div class="bar-fill" style="width:75%"></div>
                 </div>
                 <span>123</span>
               </div>
               <div class="stat-bar">
                 <span>2021</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 80%"></div>
+                  <div class="bar-fill" style="width:80%"></div>
                 </div>
                 <span>128</span>
               </div>
               <div class="stat-bar">
                 <span>2020</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 85%"></div>
+                  <div class="bar-fill" style="width:85%"></div>
                 </div>
                 <span>135</span>
               </div>
@@ -682,25 +685,26 @@
             <div class="stat-value">47,790,662</div>
             <div class="stat-unit">kWh</div>
             <div class="stat-change negative">↓ 27% from 2019</div>
+            <div class极>
             <div class="stat-bars">
               <div class="stat-bar">
                 <span>2022</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 70%"></div>
-                </div>
+                  <div class="bar-fill" style="width:70%"></div>
+                </极>
                 <span>47,790,662</span>
               </div>
               <div class="stat-bar">
                 <span>2021</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 75%"></div>
+                  <div class="bar-fill" style="width:75%"></div>
                 </div>
                 <span>49,324,077</span>
               </div>
               <div class="stat-bar">
                 <span>2020</span>
                 <div class="bar-container">
-                  <div class="bar-fill" style="width: 73%"></div>
+                  <div class="bar-fill" style="width:73%"></div>
                 </div>
                 <span>48,784,205</span>
               </div>
@@ -718,6 +722,7 @@
           </div>
           <div class="chart-filters">
             <div class="filter-group">
+              <label class="极>
               <label class="filter-label">Type</label>
               <div class="filter-buttons">
                 <button class="filter-btn">Refurbishment</button>
@@ -735,41 +740,39 @@
           </div>
         </div>
         <div class="chart-container" id="chartContainer">
-          <div class="chart-bar" style="height: 60%"><div class="chart-bar-value">549</div></div>
-          <div class="chart-bar" style="height: 30%"><div class="chart-bar-value">278</div></div>
-          <div class="chart-bar" style="height: 95%"><div class="chart-bar-value">875</div></div>
-          <div class="chart-bar" style="height: 65%"><div class="chart-bar-value">617</div></div>
-          <div class="chart-bar" style="height: 55%"><div class="chart-bar-value">506</div></div>
-          <div class="chart-bar" style="height: 10%"><div class="chart-bar-value">36</div></div>
-          <div class="chart-bar" style="height: 20%"><div class="chart-bar-value">185</div></div>
-          <div class="chart-bar" style="height: 25%"><div class="chart-bar-value">191</div></div>
-          <div class="chart-bar" style="height: 15%"><div class="chart-bar-value">122</div></div>
-          <div class="chart-bar" style="height: 70%"><div class="chart-bar-value">550</div></div>
-          <div class="chart-bar" style="height: 90%"><div class="chart-bar-value">881</div></div>
-          <div class="chart-bar" style="height: 58%"><div class="chart-bar-value">539</div></div>
-          <div class="chart-bar" style="height: 28%"><div class="chart-bar-value">269</div></div>
-          <div class="chart-bar" style="height: 8%"><div class="chart-bar-value">29</div></div>
-          <div class="chart-bar" style="height: 12%"><div class="chart-bar-value">82</div></div>
-          <div class="chart-bar" style="height: 6%"><div class="chart-bar-value">44</div></div>
-          <div class="chart-bar" style="height: 18%"><div class="chart-bar-value">109</div></div>
-          <div class="chart-bar" style="height: 14%"><div class="chart-bar-value">106</div></div>
-          <div class="chart-bar" style="height: 65%"><div class="chart-bar-value">607</div></div>
-          <div class="chart-bar" style="height: 57%"><div class="chart-bar-value">528</div></div>
+          <div class="chart-bar" style="height:60%"><div class="chart-bar-value">549</div></div>
+          <div class="chart-bar" style="height:30%"><div class="chart-bar-value">278</div></div>
+          <div class="chart-bar" style="height:95%"><div class="chart-bar-value">875</div></div>
+          <div class="chart-bar" style="height:65%"><div class="chart-bar-value">617</div></div>
+          <div class="chart-bar" style="height:55%"><div class="chart-bar-value">506极>
+          <div class="chart-bar" style="height:10%"><div class="chart-bar-value">36</div></div>
+          <div class="chart-bar" style="height:20%"><div class="chart-bar-value">185</div></div>
+          <div class="chart-bar" style="height:25%"><div class="chart-bar-value">191</div></div>
+          <div class="chart-bar" style="height:15%"><div class="chart-bar-value">122</div></div>
+          <div class="chart-bar" style="height:70%"><div class="chart-bar-value">550</div></div>
+          <div class="chart-bar" style="height:90%"><div class="chart-bar-value">881</div></div>
+          <div class="chart-bar" style="height:58%"><div class="chart-bar-value">539</div></div>
+          <div class="chart-bar" style="height:28%"><div class="chart-bar-value">269</div></div>
+          <div class="chart-bar" style="height:8%"><div class="chart-bar-value">29</div></div>
+          <div class="chart-bar" style="height:12%"><div class="chart-bar-value">82</div></div>
+          <div class="chart-bar" style="height:6%"><div class="chart-bar-value">44</div></div>
+          <div class="chart-bar" style="height:18%"><div class="chart-bar-value">109</div></div>
+          <div class="chart-bar" style="height:14%"><div class="chart-bar-value">106</div></div>
+          <div class="chart-bar" style="height:65%"><div class="chart-bar-value">607</div></div>
+          <div class="chart-bar" style="height:57%"><div class="chart-bar-value">528</div></div>
         </div>
       </section>
 
-      <!-- Customer Section (Font Awesome Logos) -->
+      <!-- Customer Section (Names Only) -->
       <section class="customers-section" id="customers">
         <h2 class="customers-title">Trusted by Industry Leaders</h2>
         <div class="customers-grid">
-          <span class="company-logo" title="Apple"><i class="fab fa-apple"></i></span>
-          <span class="company-logo" title="Microsoft"><i class="fab fa-microsoft"></i></span>
-          <span class="company-logo" title="Google"><i class="fab fa-google"></i></span>
-          <span class="company-logo" title="Amazon"><i class="fab fa-amazon"></i></span>
-          <span class="company-logo" title="Facebook"><i class="fab fa-facebook-f"></i></span>
-          <span class="company-logo" title="Twitter"><i class="fab fa-x-twitter"></i></span>
-          <span class="company-logo" title="LinkedIn"><i class="fab fa-linkedin-in"></i></span>
-          <span class="company-logo" title="Dropbox"><i class="fab fa-dropbox"></i></span>
+          <div class="customer-name">Perplexity</div>
+          <div class="customer-name">Supercell</div>
+          <div class="customer-name">Monzo</div>
+          <div class="customer-name">Raycast</div>
+          <div class="customer-name">Retool</div>
+          <div class="customer-name">Mercury</div>
         </div>
       </section>
 
@@ -827,6 +830,7 @@
               <span class="brand-icons">
                 <span class="dot purple"></span>
                 <span class="dot red"></span>
+                <极>
                 <span class="dot white"></span>
               </span>
               <span class="brand-name">The Agency</span>
@@ -894,7 +898,7 @@
     const track = document.getElementById('carouselTrack');
 
     function updateCarousel() {
-      track.style.transform = translateX(-${currentSlide * 100}%);
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
       dots.forEach((dot, index) => {
         dot.classList.toggle('active', index === currentSlide);
       });
