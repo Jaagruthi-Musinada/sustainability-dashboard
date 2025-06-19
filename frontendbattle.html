@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sustainability Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --hue: 208;
+      --primary: hsl(var(--hue), 80%, 55%);
+      --primary-light: hsl(var(--hue), 80%, 65%);
+      --primary-lighter: hsl(var(--hue), 80%, 85%);
+      --primary-dark: hsl(var(--hue), 80%, 35%);
+      --primary-darkest: hsl(var(--hue), 80%, 25%);
+      --text-main: #222d3d;
+      --text-muted: #666;
+      --bg-main: #f8f9fa;
+      --card-bg: #fff;
+      --border-radius: 16px;
+      --transition: all 0.3s cubic-bezier(.4,1,.7,1);
+      --shadow: 0 4px 24px rgba(0,0,0,0.09);
+    }
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Loader (Horizontal Bar) */
+    .loader-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: opacity 0.3s;
+    }
+    .loader {
+      width: 80%;
+      max-width: 420px;
+      height: 16px;
+      background: #3a3a3a;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .loader-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 8px;
+      transition: width 0.3s;
+    }
+    .loader-percentage {
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      background: var(--primary-darkest);
+      color: white;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-radius: var(--border-radius);
+      margin-bottom: 30px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: white;
+    }
+    .navbar-brand i {
+      font-size: 1.8rem;
+    }
+    .navbar-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .navbar-links a {
+      color: #e0e0e0;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: var(--transition);
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+    .navbar-links a:hover, .navbar-links a.active {
+      color: white;
+      background: var(--primary-dark);
+    }
+    .navbar-icon {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .navbar-links {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        background: var(--primary-darkest);
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: var(--transition);
+        z-index: 99;
+      }
+      .navbar-links.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .navbar-icon {
+        display: block;
+      }
+    }
+
+    /* About Section */
+    .about-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 32px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .about-section h1 {
+      font-size: 2.2rem;
+      color: var(--primary-darkest);
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    .about-section p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      max-width: 800px;
+      line-height: 1.7;
+    }
+    .theme-highlight {
+      display: inline-block;
+      background: var(--primary-darkest);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 30px;
+      font-weight: 600;
+      margin: 10px 0;
+    }
+
+    /* Stats Dashboard Section */
+    .stats-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 32px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--primary-lighter);
+      border-radius: var(--border-radius);
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      transition: var(--transition);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      background: var(--primary-light);
+      color: #fff;
+    }
+    .stat-title {
+      font-size: 1rem;
+      color: var(--primary-darkest);
+      margin-bottom: 8px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-darkest);
+      margin-bottom: 8px;
+    }
+    .stat-unit {
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+    }
+    .stat-change {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .stat-change.positive {
+      color: #00b894;
+    }
+    .stat-change.negative {
+      color: #e17055;
+    }
+    .stat-bars {
+      margin-top: 24px;
+    }
+    .stat-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      color: var(--primary-darkest);
+    }
+    .bar-container {
+      position: relative;
+      width: 70%;
+      height: 8px;
+      background: var(--primary-lighter);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--primary-dark);
+      border-radius: 4px;
+      transition: width 1.5s cubic-bezier(.4,1,.7,1);
+    }
+
+    /* Chart Section */
+    .chart-section {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 32px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+    .chart-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-darkest);
+      line-height: 1.2;
+    }
+    .chart-subtitle {
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+      margin-top: 8px;
+    }
+    .chart-filters {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .filter-label {
+      font-size: 0.95rem;
+      color: var(--primary-darkest);
+      font-weight: 600;
+    }
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--primary);
+      border-radius: 20px;
+      background: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--primary-darkest);
+      font-weight: 600;
+    }
+    .filter-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .chart-container {
+      height: 400px;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      padding: 20px 0;
+      border-bottom: 2px solid #e9ecef;
+      position: relative;
+    }
+    .chart-bar {
+      background: var(--primary);
+      border-radius: 4px 4px 0 0;
+      min-width: 24px;
+      flex: 1;
+      position: relative;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .chart-bar:hover {
+      background: var(--primary-dark);
+    }
+    .chart-bar-value {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary-darkest);
+    }
+
+    /* Customer Section (Font Awesome Icons) */
+    .customers-section {
+      background: var(--primary);
+      border-radius: var(--border-radius);
+      padding: 48px 32px;
+      margin-bottom: 40px;
+      text-align: center;
+      color: white;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .customers-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+    .customers-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 36px;
+      margin-top: 24px;
+    }
+    .company-logo {
+      font-size: 2.8rem;
+      border-radius: 12px;
+      background: var(--primary-light);
+      color: var(--primary-darkest);
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .company-logo:hover {
+      background: var(--primary-dark);
+      color: #fff;
+      transform: translateY(-5px) scale(1.08);
+    }
+
+    /* Carousel Section */
+    .carousel-section {
+      margin-bottom: 40px;
+    }
+    .carousel-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 32px;
+      color: var(--primary-darkest);
+    }
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--border-radius);
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(.4,1,.7,1);
+    }
+    .carousel-slide {
+      min-width: 100%;
+      padding: 48px 32px;
+      text-align: center;
+      background: var(--primary-darkest);
+      color: #fff;
+    }
+    .carousel-slide h3 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+    .carousel-slide p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .carousel-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .carousel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ddd;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .carousel-dot.active {
+      background: var(--primary);
+    }
+
+    /* Brand Kits Card */
+    .brand-kits-card {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 40px auto;
+      background: var(--card-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 18px;
+      gap: 12px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .brand-heading {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0 0 22px 0;
+      color: var(--primary-darkest);
+      text-align: center;
+    }
+    .brand-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+    }
+    .brand-item {
+      display: flex;
+      align-items: center;
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 18px 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: var(--transition);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .brand-item:hover {
+      background: var(--primary-lighter);
+    }
+    .brand-item.active {
+      border: 2px solid var(--primary);
+      background: var(--primary-lighter);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    .brand-select {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 18px;
+      transition: var(--transition);
+      position: relative;
+    }
+    .brand-item.active .brand-select {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .brand-item.active .brand-select::before {
+      content: '✓';
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .brand-icons {
+      display: flex;
+      gap: 5px;
+      margin-right: 14px;
+    }
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    .green { background: #23c388; }
+    .orange { background: #ffba42; }
+    .purple { background: #7d6bff; }
+    .red { background: #ff3d3d; }
+    .white { background: #fff; border: 1px solid #e0e0e0; }
+    .brand-name {
+      flex: 1;
+      font-size: 1.07rem;
+      font-weight: 600;
+      color: var(--primary-darkest);
+    }
+    .brand-settings {
+      width: 28px;
+      height: 28px;
+      background: url('data:image/svg+xml;utf8,<svg fill="none" stroke="%23888" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09c0 .66.39 1.25 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c0 .66.39 1.25 1 1.51H21a2 2 0 1 1 0 4h-.09c-.66 0-1.25.39-1.51 1z"/></svg>');
+      background-size: 70%;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 12px; }
+      .about-section, .stats-section, .chart-section, .customers-section, .carousel-slide { padding: 20px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 20px; }
+      .stat-value { font-size: 2rem; }
+      .chart-header { flex-direction: column; gap: 20px; }
+      .chart-filters { width: 100%; }
+      .brand-kits-card { margin: 20px auto; padding: 20px 12px; }
+      .customers-grid { gap: 18px; }
+      .company-logo { font-size: 2.1rem; width: 50px; height: 50px; }
+    }
+    @media (max-width: 480px) {
+      .chart-container { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader (Horizontal Bar) -->
+  <div class="loader-overlay" id="loaderOverlay">
+    <div class="loader">
+      <div class="loader-bar" id="loaderBar"></div>
+    </div>
+    <div class="loader-percentage" id="loaderPercent">0%</div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="#" class="navbar-brand"><i class="fas fa-leaf"></i> EcoMetrics</a>
+    <div class="navbar-links" id="navbarLinks">
+      <a href="#about" class="active">About</a>
+      <a href="#stats">Stats</a>
+      <a href="#emissions">Emissions</a>
+      <a href="#customers">Customers</a>
+      <a href="#brands">Brands</a>
+    </div>
+    <div class="navbar-icon" id="navbarIcon">
+      <i class="fas fa-bars"></i>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="main-content" id="mainContent">
+      <!-- About Section -->
+      <section class="about-section" id="about">
+        <h1>Sustainability Dashboard</h1>
+        <p>Welcome to our comprehensive ESG (Environmental, Social, and Governance) tracking platform. Monitor, analyze, and optimize your organization's environmental impact with real-time metrics and actionable insights.</p>
+        <p><span class="theme-highlight">Theme: Environmental, Social, and Governance (ESG) Tracking</span></p>
+        <p>This dashboard provides a unified view of your sustainability performance, including carbon footprint, energy consumption, and more—empowering you to make informed decisions for a greener future.</p>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-section" id="stats">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-title">Managed portfolio carbon footprint</div>
+            <div class="stat-value">45,048</div>
+            <div class="stat-unit">tCO₂e</div>
+            <div class="stat-change positive">↑ 16% from 2019</div>
+            <div class="stat-bars">
+              <div class="stat-bar">
+                <span>2022</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 85%"></div>
+                </div>
+                <span>45,048</span>
+              </div>
+              <div class="stat-bar">
+                <span>2021</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 25%"></div>
+                </div>
+                <span>14,111</span>
+              </div>
+              <div class="stat-bar">
+                <span>2020</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 60%"></div>
+                </div>
+                <span>32,813</span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Managed portfolio energy intensity</div>
+            <div class="stat-value">123</div>
+            <div class="stat-unit">kWh/m²</div>
+            <div class="stat-change negative">↓ 22% from 2019</div>
+            <div class="stat-bars">
+              <div class="stat-bar">
+                <span>2022</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 75%"></div>
+                </div>
+                <span>123</span>
+              </div>
+              <div class="stat-bar">
+                <span>2021</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 80%"></div>
+                </div>
+                <span>128</span>
+              </div>
+              <div class="stat-bar">
+                <span>2020</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 85%"></div>
+                </div>
+                <span>135</span>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Managed portfolio energy consumption</div>
+            <div class="stat-value">47,790,662</div>
+            <div class="stat-unit">kWh</div>
+            <div class="stat-change negative">↓ 27% from 2019</div>
+            <div class="stat-bars">
+              <div class="stat-bar">
+                <span>2022</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 70%"></div>
+                </div>
+                <span>47,790,662</span>
+              </div>
+              <div class="stat-bar">
+                <span>2021</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 75%"></div>
+                </div>
+                <span>49,324,077</span>
+              </div>
+              <div class="stat-bar">
+                <span>2020</span>
+                <div class="bar-container">
+                  <div class="bar-fill" style="width: 73%"></div>
+                </div>
+                <span>48,784,205</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart Section -->
+      <section class="chart-section" id="emissions">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">EMBODIED<br>CARBON<br>EMISSIONS</h2>
+            <p class="chart-subtitle">Intensity measured by kgCO₂e/m²</p>
+          </div>
+          <div class="chart-filters">
+            <div class="filter-group">
+              <label class="filter-label">Type</label>
+              <div class="filter-buttons">
+                <button class="filter-btn">Refurbishment</button>
+                <button class="filter-btn">New build</button>
+                <button class="filter-btn active">All</button>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Status</label>
+              <div class="filter-buttons">
+                <button class="filter-btn active">Complete</button>
+                <button class="filter-btn">Estimate</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container" id="chartContainer">
+          <div class="chart-bar" style="height: 60%"><div class="chart-bar-value">549</div></div>
+          <div class="chart-bar" style="height: 30%"><div class="chart-bar-value">278</div></div>
+          <div class="chart-bar" style="height: 95%"><div class="chart-bar-value">875</div></div>
+          <div class="chart-bar" style="height: 65%"><div class="chart-bar-value">617</div></div>
+          <div class="chart-bar" style="height: 55%"><div class="chart-bar-value">506</div></div>
+          <div class="chart-bar" style="height: 10%"><div class="chart-bar-value">36</div></div>
+          <div class="chart-bar" style="height: 20%"><div class="chart-bar-value">185</div></div>
+          <div class="chart-bar" style="height: 25%"><div class="chart-bar-value">191</div></div>
+          <div class="chart-bar" style="height: 15%"><div class="chart-bar-value">122</div></div>
+          <div class="chart-bar" style="height: 70%"><div class="chart-bar-value">550</div></div>
+          <div class="chart-bar" style="height: 90%"><div class="chart-bar-value">881</div></div>
+          <div class="chart-bar" style="height: 58%"><div class="chart-bar-value">539</div></div>
+          <div class="chart-bar" style="height: 28%"><div class="chart-bar-value">269</div></div>
+          <div class="chart-bar" style="height: 8%"><div class="chart-bar-value">29</div></div>
+          <div class="chart-bar" style="height: 12%"><div class="chart-bar-value">82</div></div>
+          <div class="chart-bar" style="height: 6%"><div class="chart-bar-value">44</div></div>
+          <div class="chart-bar" style="height: 18%"><div class="chart-bar-value">109</div></div>
+          <div class="chart-bar" style="height: 14%"><div class="chart-bar-value">106</div></div>
+          <div class="chart-bar" style="height: 65%"><div class="chart-bar-value">607</div></div>
+          <div class="chart-bar" style="height: 57%"><div class="chart-bar-value">528</div></div>
+        </div>
+      </section>
+
+      <!-- Customer Section (Font Awesome Logos) -->
+      <section class="customers-section" id="customers">
+        <h2 class="customers-title">Trusted by Industry Leaders</h2>
+        <div class="customers-grid">
+          <span class="company-logo" title="Apple"><i class="fab fa-apple"></i></span>
+          <span class="company-logo" title="Microsoft"><i class="fab fa-microsoft"></i></span>
+          <span class="company-logo" title="Google"><i class="fab fa-google"></i></span>
+          <span class="company-logo" title="Amazon"><i class="fab fa-amazon"></i></span>
+          <span class="company-logo" title="Facebook"><i class="fab fa-facebook-f"></i></span>
+          <span class="company-logo" title="Twitter"><i class="fab fa-x-twitter"></i></span>
+          <span class="company-logo" title="LinkedIn"><i class="fab fa-linkedin-in"></i></span>
+          <span class="company-logo" title="Dropbox"><i class="fab fa-dropbox"></i></span>
+        </div>
+      </section>
+
+      <!-- Carousel Section -->
+      <section class="carousel-section">
+        <h2 class="carousel-title">Featured Content</h2>
+        <div class="carousel-container">
+          <div class="carousel-track" id="carouselTrack">
+            <div class="carousel-slide">
+              <h3>Sustainability Dashboard</h3>
+              <p>Track your environmental impact with comprehensive carbon footprint analysis and energy consumption metrics.</p>
+            </div>
+            <div class="carousel-slide">
+              <h3>Data Visualization</h3>
+              <p>Interactive charts and graphs provide clear insights into your sustainability performance over time.</p>
+            </div>
+            <div class="carousel-slide">
+              <h3>Client Success</h3>
+              <p>Join leading companies who trust our platform to manage their environmental data and reporting needs.</p>
+            </div>
+          </div>
+        </div>
+        <div class="carousel-controls" id="carouselControls">
+          <button class="carousel-dot active" data-slide="0"></button>
+          <button class="carousel-dot" data-slide="1"></button>
+          <button class="carousel-dot" data-slide="2"></button>
+        </div>
+      </section>
+
+      <!-- Brand Kits Card -->
+      <section id="brands">
+        <div class="brand-kits-card">
+          <div class="brand-heading">Brand Kits</div>
+          <div class="brand-list">
+            <div class="brand-item" data-brand="ECorp">
+              <span class="brand-select"></span>
+              <span class="brand-icons">
+                <span class="dot green"></span>
+                <span class="dot white"></span>
+              </span>
+              <span class="brand-name">ECorp</span>
+              <span class="brand-settings"></span>
+            </div>
+            <div class="brand-item" data-brand="ICorp">
+              <span class="brand-select"></span>
+              <span class="brand-icons">
+                <span class="dot orange"></span>
+                <span class="dot white"></span>
+              </span>
+              <span class="brand-name">ICorp</span>
+              <span class="brand-settings"></span>
+            </div>
+            <div class="brand-item active" data-brand="The Agency">
+              <span class="brand-select"></span>
+              <span class="brand-icons">
+                <span class="dot purple"></span>
+                <span class="dot red"></span>
+                <span class="dot white"></span>
+              </span>
+              <span class="brand-name">The Agency</span>
+              <span class="brand-settings"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Loader with horizontal bar and percentage
+    let percent = 0;
+    let loaderBar = document.getElementById('loaderBar');
+    let loaderPercent = document.getElementById('loaderPercent');
+    let loaderOverlay = document.getElementById('loaderOverlay');
+    let mainContent = document.getElementById('mainContent');
+    let interval = setInterval(() => {
+      percent += Math.floor(Math.random() * 7) + 2;
+      if (percent > 100) percent = 100;
+      loaderBar.style.width = percent + '%';
+      loaderPercent.textContent = percent + "%";
+      if (percent === 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          loaderOverlay.style.opacity = '0';
+          setTimeout(() => {
+            loaderOverlay.style.display = 'none';
+            mainContent.style.display = 'block';
+          }, 350);
+        }, 400);
+      }
+    }, 40);
+
+    // Animate stats bars
+    setTimeout(() => {
+      document.querySelectorAll('.bar-fill').forEach(bar => {
+        let w = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => { bar.style.width = w; }, 50);
+      });
+    }, 700);
+
+    // Brand selection functionality
+    document.querySelectorAll('.brand-item').forEach(item => {
+      item.addEventListener('click', function() {
+        document.querySelectorAll('.brand-item').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.filter-buttons').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Carousel functionality
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const track = document.getElementById('carouselTrack');
+
+    function updateCarousel() {
+      track.style.transform = translateX(-${currentSlide * 100}%);
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+    }
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        currentSlide = index;
+        updateCarousel();
+      });
+    });
+
+    // Auto-advance carousel
+    setInterval(() => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      updateCarousel();
+    }, 5000);
+
+    // Chart bar hover effects
+    document.querySelectorAll('.chart-bar').forEach(bar => {
+      bar.addEventListener('mouseenter', function() {
+        this.style.transform = 'scaleY(1.05)';
+      });
+      bar.addEventListener('mouseleave', function() {
+        this.style.transform = 'scaleY(1)';
+      });
+    });
+
+    // Responsive Navbar
+    document.getElementById('navbarIcon').addEventListener('click', function() {
+      document.getElementById('navbarLinks').classList.toggle('show');
+    });
+
+    // Responsive handling
+    function handleResize() {
+      updateCarousel();
+    }
+    window.addEventListener('resize', handleResize);
+  </script>
+</body>
+</html>
